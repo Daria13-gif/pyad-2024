@@ -7,8 +7,24 @@ def matrix_multiplication(matrix_a, matrix_b):
     Задание 1. Функция для перемножения матриц с помощью списков и циклов.
     Вернуть нужно матрицу в формате списка.
     """
-    # put your code here
-    pass
+    m = len(matrix_a)         # Количество строк в A
+    n = len(matrix_a[0])      # Количество столбцов в A
+    p = len(matrix_b[0])      # Количество столбцов в B
+
+    # Проверяем, можно ли перемножить матрицы
+    if len(matrix_b) != n:
+        raise ValueError("Число столбцов первой матрицы должно равняться числу строк второй матрицы.")
+
+    # Создаем результатирующую матрицу C размером m x p
+    C = [[0 for _ in range(p)] for _ in range(m)]
+
+    # Умножаем матрицы
+    for i in range(m):
+        for j in range(p):
+            for k in range(n):
+                C[i][j] += matrix_a[i][k] * matrix_b[k][j]
+
+    return C
 
 
 def functions(a_1, a_2):
@@ -17,8 +33,48 @@ def functions(a_1, a_2):
     Необходимо найти точки экстремума функции и определить, есть ли у функций общие решения.
     Вернуть нужно координаты найденных решения списком, если они есть. None, если их бесконечно много.
     """
-    # put your code here
-    pass
+    coeffs_f = list(map(float, a_1.split()))
+    coeffs_p = list(map(float, a_2.split()))
+
+    # Коэффициенты для F(x)
+    a11, a12, a13 = coeffs_f
+    # Коэффициенты для P(x)
+    a21, a22, a23 = coeffs_p
+
+    # Вычисляем экстремумы (вершины) для F(x) и P(x)
+    x_F = -a12 / (2 * a11) if a11 != 0 else None  # Вершина F(x)
+    x_P = -a22 / (2 * a21) if a21 != 0 else None  # Вершина P(x)
+
+    # Находим общие решения, приравнивая F(x) к P(x)
+    a_diff = a11 - a21
+    b_diff = a12 - a22
+    c_diff = a13 - a23
+
+    # Вычисляем дискриминант
+    D = b_diff ** 2 - 4 * a_diff * c_diff
+
+    # Определяем количество решений
+    if a_diff == 0:  # Если a11 == a21, то это линейное уравнение или постоянное
+        if b_diff == 0:
+            if c_diff == 0:
+                return None  # Бесконечно много решений
+            else:
+                return []  # Нет решений
+        else:
+            x = -c_diff / b_diff  # Линейное уравнение
+            return [x]  # Одно решение
+    else:
+        if D > 0:
+            # Два различных решения
+            x1 = (-b_diff + np.sqrt(D)) / (2 * a_diff)
+            x2 = (-b_diff - np.sqrt(D)) / (2 * a_diff)
+            return [x1, x2]
+        elif D == 0:
+            # Одно повторяющееся решение
+            x = -b_diff / (2 * a_diff)
+            return [x]
+        else:
+            return []  # Нет действительных решений
 
 
 def skew(x):
@@ -26,8 +82,19 @@ def skew(x):
     Задание 3. Функция для расчета коэффициента асимметрии.
     Необходимо вернуть значение коэффициента асимметрии, округленное до 2 знаков после запятой.
     """
-    # put your code here
-    pass
+    n = len(x)
+    mean = np.mean(x)
+
+    # Центральный момент третьего порядка
+    m3 = np.sum((x - mean) ** 3) / n
+
+    # Стандартное отклонение
+    std_dev = np.std(x)
+
+    # Коэффициент асимметрии
+    A = m3 / (std_dev ** 3) if std_dev != 0 else 0
+
+    return round(A, 2)
 
 
 def kurtosis(x):
@@ -35,5 +102,16 @@ def kurtosis(x):
     Задание 3. Функция для расчета коэффициента эксцесса.
     Необходимо вернуть значение коэффициента эксцесса, округленное до 2 знаков после запятой.
     """
-    # put your code here
-    pass
+    n = len(x)
+    mean = np.mean(x)
+
+    # Центральный момент четвертого порядка
+    m4 = np.sum((x - mean) ** 4) / n
+
+    # Стандартное отклонение
+    std_dev = np.std(x)
+
+    # Коэффициент эксцесса
+    E = (m4 / (std_dev ** 4)) - 3 if std_dev != 0 else 0
+
+    return round(E, 2)
