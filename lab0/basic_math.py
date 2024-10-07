@@ -33,48 +33,66 @@ def functions(a_1, a_2):
     Необходимо найти точки экстремума функции и определить, есть ли у функций общие решения.
     Вернуть нужно координаты найденных решения списком, если они есть. None, если их бесконечно много.
     """
-    coeffs_f = list(map(float, a_1.split()))
-    coeffs_p = list(map(float, a_2.split()))
+    # Парсим коэффициенты
+    a1 = list(map(float, a_1.split()))
+    a2 = list(map(float, a_2.split()))
 
-    # Коэффициенты для F(x)
-    a11, a12, a13 = coeffs_f
-    # Коэффициенты для P(x)
-    a21, a22, a23 = coeffs_p
+    # Определяем функции F(x) и P(x)
+    def F(x):
+        return a1[0] * x ** 2 + a1[1] * x + a1[2]
 
-    # Вычисляем экстремумы (вершины) для F(x) и P(x)
-    x_F = -a12 / (2 * a11) if a11 != 0 else None  # Вершина F(x)
-    x_P = -a22 / (2 * a21) if a21 != 0 else None  # Вершина P(x)
+    def P(x):
+        return a2[0] * x ** 2 + a2[1] * x + a2[2]
 
-    # Находим общие решения, приравнивая F(x) к P(x)
-    a_diff = a11 - a21
-    b_diff = a12 - a22
-    c_diff = a13 - a23
+    # Находим экстремумы F(x)
+    res_F = minimize_scalar(F)
+    extremum_F = res_F.x if res_F.success else None
 
-    # Вычисляем дискриминант
-    D = b_diff ** 2 - 4 * a_diff * c_diff
+    # Находим экстремумы P(x)
+    res_P = minimize_scalar(P)
+    extremum_P = res_P.x if res_P.success else None
 
-    # Определяем количество решений
-    if a_diff == 0:  # Если a11 == a21, то это линейное уравнение или постоянное
-        if b_diff == 0:
-            if c_diff == 0:
-                return None  # Бесконечно много решений
-            else:
-                return []  # Нет решений
-        else:
-            x = -c_diff / b_diff  # Линейное уравнение
-            return [x]  # Одно решение
+    # Печатаем экстремумы
+    if extremum_F is not None:
+        print(f"Экстремум F(x): {extremum_F}, F({extremum_F}) = {F(extremum_F)}")
     else:
-        if D > 0:
-            # Два различных решения
-            x1 = (-b_diff + np.sqrt(D)) / (2 * a_diff)
-            x2 = (-b_diff - np.sqrt(D)) / (2 * a_diff)
-            return [x1, x2]
-        elif D == 0:
-            # Одно повторяющееся решение
-            x = -b_diff / (2 * a_diff)
-            return [x]
+        print("Экстремум F(x) не найден")
+
+    if extremum_P is not None:
+        print(f"Экстремум P(x): {extremum_P}, P({extremum_P}) = {P(extremum_P)}")
+    else:
+        print("Экстремум P(x) не найден")
+
+    # Найдем общие решения уравнения F(x) = P(x)
+    coeffs = [a1[0] - a2[0], a1[1] - a2[1], a1[2] - a2[2]]
+
+    if coeffs[0] == 0 and coeffs[1] == 0 and coeffs[2] == 0:
+        # Бесконечно много решений
+        return None
+
+    if coeffs[0] == 0:
+        # Линейное уравнение
+        if coeffs[1] == 0:
+            # Уравнение вида 0 = const
+            return []
         else:
-            return []  # Нет действительных решений
+            # Решение уравнения
+            solution = -coeffs[2] / coeffs[1]
+            return [(solution, F(solution))]
+
+    # Решаем квадратное уравнение
+    roots = np.roots(coeffs)
+    results = []
+
+    for root in roots:
+        if np.isreal(root):
+            root = root.real
+            results.append((root, F(root)))
+
+    # Сортируем результаты по x
+    results.sort(key=lambda x: x[0])
+
+    return results
 
 
 def skew(x):
